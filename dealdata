@@ -1,0 +1,77 @@
+import threading
+import time
+import random
+from openpyxl import Workbook
+from queue import Queue
+from datetime import datetime
+
+
+# 发送线程每秒发送12500个数据
+def send_data(queue):
+    while True:
+        # 每秒钟发送12500个数据，16个数字
+        data = [random.randint(0, 100) for _ in range(16)]  # 模拟数据为16个随机数
+        for _ in range(12500):
+            queue.put(data)  # 将数据放入队列
+        time.sleep(1)  # 发送完后，等待1秒
+
+
+# 接收线程每5秒钟处理并保存数据
+def receive_and_process_data(queue, workbook, lock):
+    sheet = workbook.active
+    timestamp = 0
+    while True:
+        data_batch = []
+        start_time = time.time()
+
+        # 接收数据并积累 5 秒钟的数据
+        while time.time() - start_time < 5:
+            if not queue.empty():
+                data_batch.append(queue.get())  # 从队列中获取数据
+            time.sleep(0.001)  # 避免CPU过度占用
+
+        # 每次积累完5秒钟的数据，保存0.1秒的数据
+        for i in range(50):  # 5秒钟内每0.1秒保存一次数据
+            if data_batch:
+                # 获取当前的PC时间戳
+                pc_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # 精确到毫秒
+
+                # 将数据和PC时间戳存入Excel
+                with lock:
+                    sheet.append([pc_time] + data_batch[i % len(data_batch)])
+
+        timestamp += 0.5  # 每次保存数据间隔0.5秒
+
+
+# 主函数
+def main():
+    # 创建Excel文件
+    workbook = Workbook()
+    workbook.active.title = 'Data'
+
+    # 创建锁，确保线程安全写入Excel
+    lock = threading.Lock()
+
+    # 创建队列用于数据传输
+    queue = Queue()
+
+    # 创建并启动线程
+    send_thread = threading.Thread(target=send_data, args=(queue,))
+    receive_thread = threading.Thread(target=receive_and_process_data, args=(queue, workbook, lock))
+
+    send_thread.daemon = True
+    receive_thread.daemon = True
+
+    send_thread.start()
+    receive_thread.start()
+
+    # 程序运行 10 分钟作为示例
+    time.sleep(30)
+
+    # 保存 Excel 文件
+    workbook.save('data_output_with_time.xlsx')
+    print("数据保存完成！")
+
+
+if __name__ == "__main__":
+    main()
