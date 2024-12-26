@@ -75,3 +75,116 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#  统计时域
+import threading
+import time
+import random
+from openpyxl import Workbook
+from queue import Queue
+from datetime import datetime
+
+
+# 发送线程每秒发送12500个数据
+def send_data(queue):
+    while True:
+        # 每秒钟发送12500个数据，16个数字
+        data = [random.randint(0, 100) for _ in range(16)]  # 模拟数据为16个随机数
+        for _ in range(12500):
+            queue.put(data)  # 将数据放入队列
+        time.sleep(1)  # 发送完后，等待1秒
+
+
+# 将数据分割成20个bin，并统计每个bin的最大值和最小值
+def process_data_into_bins(data_batch):
+    # 每个bin的时间长度是0.005秒，假设每0.1秒有1250个数据点
+    bin_size = len(data_batch) // 20  # 每个bin包含的数据数量
+    bins = []
+
+    # 将数据分成20个bin并计算每个bin的最大值和最小值
+    for i in range(20):
+        start_index = i * bin_size
+        end_index = (i + 1) * bin_size
+        bin_data = data_batch[start_index:end_index]
+
+        # 如果bin_data为空，跳过此bin
+        if not bin_data:
+            continue  # 或者可以使用`bins.append((None, None))`将该bin标记为空
+
+        # 计算bin的最大值和最小值
+        bin_max = [max(bin_data, key=lambda x: x[j])[j] for j in range(16)]
+        bin_min = [min(bin_data, key=lambda x: x[j])[j] for j in range(16)]
+        bins.append((bin_max, bin_min))
+
+    return bins
+
+
+# 接收线程每5秒钟处理并保存数据
+def receive_and_process_data(queue, workbook, lock):
+    sheet = workbook.active
+    timestamp = 0
+    while True:
+        data_batch = []
+        start_time = time.time()
+
+        # 接收数据并积累 5 秒钟的数据
+        while time.time() - start_time < 5:
+            if not queue.empty():
+                data_batch.append(queue.get())  # 从队列中获取数据
+            time.sleep(0.001)  # 避免CPU过度占用
+
+        # 每次积累完5秒钟的数据，保存0.1秒的数据并统计bin的最大最小值
+        for i in range(50):  # 5秒钟内每0.1秒保存一次数据
+            if data_batch:
+                # 获取当前的PC时间戳
+                pc_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]  # 精确到毫秒
+
+                # 获取当前0.1秒的数据段（每0.1秒有1250个数据点）
+                data_segment = data_batch[i * 1250:(i + 1) * 1250]
+
+                # 分割数据为20个bin并统计最大最小值
+                bins = process_data_into_bins(data_segment)
+
+                # 将数据和PC时间戳存入Excel
+                with lock:
+                    for j, (bin_max, bin_min) in enumerate(bins):
+                        # 记录每个bin的最大值和最小值
+                        row = [pc_time, f"0.1s-{i + 1}-Bin-{j + 1}"] + bin_max + bin_min
+                        sheet.append(row)
+
+        timestamp += 0.5  # 每次保存数据间隔0.5秒
+
+
+# 主函数
+def main():
+    # 创建Excel文件
+    workbook = Workbook()
+    workbook.active.title = 'Data'
+
+    # 创建锁，确保线程安全写入Excel
+    lock = threading.Lock()
+
+    # 创建队列用于数据传输
+    queue = Queue()
+
+    # 创建并启动线程
+    send_thread = threading.Thread(target=send_data, args=(queue,))
+    receive_thread = threading.Thread(target=receive_and_process_data, args=(queue, workbook, lock))
+
+    send_thread.daemon = True
+    receive_thread.daemon = True
+
+    send_thread.start()
+    receive_thread.start()
+
+    # 程序运行 10 分钟作为示例
+    time.sleep(30)
+
+    # 保存 Excel 文件
+    workbook.save('data_output_with_bins.xlsx')
+    print("数据保存完成！")
+
+
+if __name__ == "__main__":
+    main()
+
