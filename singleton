@@ -1,0 +1,69 @@
+import multiprocessing
+
+# 单例类
+class Singleton:
+    _instance = None
+    
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.shared_list = multiprocessing.Manager().list()  # 使用 Manager 来共享列表
+        return cls._instance
+
+# 进程函数
+def add_to_list(index):
+    singleton = Singleton()
+    singleton.shared_list.append(index)
+    print(f"进程 {multiprocessing.current_process().name} 添加了 {index}，当前列表: {list(singleton.shared_list)}")
+
+if __name__ == "__main__":
+    # 创建多个进程来修改同一个列表
+    processes = []
+    for i in range(5):
+        p = multiprocessing.Process(target=add_to_list, args=(i,))
+        processes.append(p)
+        p.start()
+
+    # 等待所有进程结束
+    for p in processes:
+        p.join()
+
+    # 打印最终列表
+    singleton = Singleton()
+    print(f"最终共享的列表: {list(singleton.shared_list)}")
+
+
+import multiprocessing
+
+# 单例类
+class Singleton:
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance.manager = multiprocessing.Manager()  # 创建 Manager 实例
+            cls._instance.shared_list = cls._instance.manager.list()  # 使用 Manager 创建共享列表
+        return cls._instance
+
+# 进程函数
+def add_to_list(index):
+    singleton = Singleton()  # 获取单例实例
+    singleton.shared_list.append(index)  # 向共享列表添加元素
+    print(f"进程 {multiprocessing.current_process().name} 添加了 {index}，当前列表: {list(singleton.shared_list)}")
+
+if __name__ == "__main__":
+    # 创建多个进程来修改同一个列表
+    processes = []
+    for i in range(3):
+        p = multiprocessing.Process(target=add_to_list, args=(i,))
+        processes.append(p)
+        p.start()
+
+    # 等待所有进程结束
+    for p in processes:
+        p.join()
+
+    # 打印最终列表
+    singleton = Singleton()
+    print(f"最终共享的列表: {list(singleton.shared_list)}")
