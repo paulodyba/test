@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件管理器</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            background: #fff;
+        }
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        .file-item {
+            background: #2196F3;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <ul>
+            <li>📁 我的文件</li>
+            <li>📂 新建文件夹</li>
+            <li>📄 新建文件</li>
+            <li>⚙️ 设置</li>
+            <li>🔓 退出</li>
+        </ul>
+    </div>
+    <div class="content">
+        <h2>文件管理器</h2>
+        <div class="file-grid">
+            <div class="file-item">📂 bb</div>
+            <div class="file-item">📂 aa</div>
+            <div class="file-item">📄 test.txt</div>
+            <div class="file-item">🖼️ space_cat.jpg</div>
+            <div class="file-item">🖼️ universe.jpg</div>
+            <div class="file-item">🖼️ nature.jpg</div>
+            <div class="file-item">🖼️ cat.jpg</div>
+            <div class="file-item">🎬 Big Bunny.mp4</div>
+        </div>
+    </div>
+</body>
+</html>
