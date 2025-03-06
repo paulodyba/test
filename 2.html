@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Browser - GitHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f6f8fa;
+        }
+        .navbar {
+            background: #24292e;
+            color: white;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar input {
+            padding: 5px;
+            width: 200px;
+            border-radius: 5px;
+            border: none;
+        }
+        .container {
+            display: flex;
+            padding: 20px;
+        }
+        .sidebar {
+            width: 250px;
+            background: #fff;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        .sidebar ul li {
+            padding: 10px;
+            cursor: pointer;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .repo-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .repo-description {
+            color: #555;
+            margin-bottom: 20px;
+        }
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+        .file-list li {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div>GitHub</div>
+        <input type="text" placeholder="搜索...">
+    </div>
+    <div class="container">
+        <div class="sidebar">
+            <ul>
+                <li>📁 代码</li>
+                <li>📂 问题</li>
+                <li>📄 拉取请求</li>
+                <li>📊 讨论</li>
+                <li>⚙️ 设置</li>
+            </ul>
+        </div>
+        <div class="content">
+            <div class="repo-title">File Browser</div>
+            <div class="repo-description">📂 用于管理文件的 Web 界面，支持多用户和 API 访问。</div>
+            <h3>📄 README</h3>
+            <p>File Browser 提供了一个简单的 Web 界面，允许用户管理和共享文件。</p>
+            <h3>📂 文件列表</h3>
+            <ul class="file-list">
+                <li>📁 src/ <span>上次更新 2 天前</span></li>
+                <li>📄 README.md <span>上次更新 1 天前</span></li>
+                <li>📄 LICENSE <span>上次更新 5 天前</span></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
